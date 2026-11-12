@@ -1,8 +1,11 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
-<div class="topbar">
-    <h2>Staff</h2>
-    <a href="/users/new" class="btn">Add Staff</a>
+<div class="module-toolbar">
+    <div class="module-intro">
+        <h2>Staff accounts</h2>
+        <p>Manage the people who can access this system.</p>
+    </div>
+    <div class="module-actions"><a href="/users/new" class="btn">Add staff member</a></div>
 </div>
 
 <div class="card">
@@ -20,24 +23,25 @@
             <?php foreach ($users as $user): ?>
                 <tr>
                     <td>
-                        <?php if (!empty($user['avatar']) && file_exists(FCPATH . $user['avatar'])): ?>
-                            <img src="/<?= esc($user['avatar']) ?>" alt="" style="width: 42px; height:42px; border-radius:50%; object-fit:cover;">
-                        <?php else: ?>
-                            <span>No avatar</span>
-                        <?php endif; ?>
+                        <span class="record-image round">
+                            <?php if (!empty($user['avatar']) && file_exists(FCPATH . $user['avatar'])): ?>
+                                <img src="/<?= esc($user['avatar']) ?>" alt="<?= esc($user['full_name']) ?>">
+                            <?php else: ?><?= esc(strtoupper(mb_substr($user['full_name'], 0, 2))) ?><?php endif; ?>
+                        </span>
                     </td>
                     <td><?= esc($user['username']) ?></td>
                     <td><?= esc($user['full_name']) ?></td>
                     <td><?= esc(date('Y-m-d', strtotime($user['created_at']))) ?></td>
-                    <td class="action-links">
+                    <td><div class="action-group">
                         <a href="/users/edit/<?= esc($user['id'], 'url') ?>" class="btn secondary">Edit</a>
                         <form method="post" action="/users/delete/<?= esc($user['id'], 'url') ?>" style="display:inline" onsubmit="return confirm('Delete this staff member?')">
                             <?= csrf_field() ?>
                             <button type="submit" class="btn danger">Delete</button>
                         </form>
-                    </td>
+                    </div></td>
                 </tr>
             <?php endforeach; ?>
+            <?php if (empty($users)): ?><tr><td colspan="5" class="empty-state">No staff accounts found.</td></tr><?php endif; ?>
         </tbody>
     </table>
 </div>

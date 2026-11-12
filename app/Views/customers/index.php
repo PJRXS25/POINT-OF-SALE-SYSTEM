@@ -1,8 +1,11 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
-<div class="topbar">
-    <h2>Customers</h2>
-    <a href="/customers/new" class="btn">Add Customer</a>
+<div class="module-toolbar">
+    <div class="module-intro">
+        <h2>Customer directory</h2>
+        <p>Keep customer contact information organized.</p>
+    </div>
+    <div class="module-actions"><a href="/customers/new" class="btn">Add customer</a></div>
 </div>
 
 <div class="card">
@@ -19,19 +22,20 @@
         <tbody>
             <?php foreach ($customers as $customer): ?>
                 <tr>
-                    <td><?= esc($customer['full_name']) ?></td>
+                    <td><div class="record-media"><span class="record-image round"><?= esc(strtoupper(mb_substr($customer['full_name'], 0, 2))) ?></span><span class="record-details"><strong><?= esc($customer['full_name']) ?></strong><small>Customer #<?= esc($customer['id']) ?></small></span></div></td>
                     <td><?= esc($customer['email']) ?></td>
                     <td><?= esc($customer['phone'] ?? '-') ?></td>
                     <td><?= esc(date('Y-m-d', strtotime($customer['created_at']))) ?></td>
-                    <td class="action-links">
+                    <td><div class="action-group">
                         <a href="/customers/edit/<?= esc($customer['id'], 'url') ?>" class="btn secondary">Edit</a>
                         <form method="post" action="/customers/delete/<?= esc($customer['id'], 'url') ?>" style="display:inline" onsubmit="return confirm('Delete this customer?')">
                             <?= csrf_field() ?>
                             <button type="submit" class="btn danger">Delete</button>
                         </form>
-                    </td>
+                    </div></td>
                 </tr>
             <?php endforeach; ?>
+            <?php if (empty($customers)): ?><tr><td colspan="5" class="empty-state">No customers yet. Add a customer or continue using walk-in sales.</td></tr><?php endif; ?>
         </tbody>
     </table>
 </div>

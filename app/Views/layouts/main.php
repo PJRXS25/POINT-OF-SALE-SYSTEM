@@ -1,3 +1,18 @@
+<?php
+$currentPath = trim(service('uri')->getPath(), '/');
+$activeSection = explode('/', $currentPath)[0] ?? '';
+$displayName = (string) (session()->get('user_name') ?? 'Staff');
+$userInitial = strtoupper(mb_substr($displayName, 0, 1));
+$isLoggedIn = (bool) session()->get('user_id');
+$pageTitles = [
+    'dashboard' => 'Dashboard',
+    'products' => 'Products',
+    'customers' => 'Customers',
+    'users' => 'Staff',
+    'sales' => $currentPath === 'sales/new' ? 'Record Sale' : 'Sales History',
+];
+$pageTitle = $pageTitles[$activeSection] ?? 'Point of Sale';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,19 +169,20 @@
             .content { padding: 18px; }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
 </head>
 <body>
     <div class="app-shell">
-        <?php if (session()->get('user_id')): ?>
+        <?php if ($isLoggedIn): ?>
             <aside class="sidebar">
                 <div class="brand">POS Panel</div>
                 <div class="nav-group">
-                    <a class="nav-link" href="/dashboard">Dashboard</a>
-                    <a class="nav-link" href="/products">Products</a>
-                    <a class="nav-link" href="/customers">Customers</a>
-                    <a class="nav-link" href="/users">Staff</a>
-                    <a class="nav-link" href="/sales/new">Record Sale</a>
-                    <a class="nav-link" href="/sales">Sales History</a>
+                    <a class="nav-link <?= $activeSection === 'dashboard' ? 'active' : '' ?>" href="/dashboard">Dashboard</a>
+                    <a class="nav-link <?= $activeSection === 'products' ? 'active' : '' ?>" href="/products">Products</a>
+                    <a class="nav-link <?= $activeSection === 'customers' ? 'active' : '' ?>" href="/customers">Customers</a>
+                    <a class="nav-link <?= $activeSection === 'users' ? 'active' : '' ?>" href="/users">Staff</a>
+                    <a class="nav-link <?= $currentPath === 'sales/new' ? 'active' : '' ?>" href="/sales/new">Record Sale</a>
+                    <a class="nav-link <?= $currentPath === 'sales' ? 'active' : '' ?>" href="/sales">Sales History</a>
                     <form method="post" action="/logout">
                         <?= csrf_field() ?>
                         <button class="nav-link nav-button" type="submit">Logout</button>
@@ -175,16 +191,25 @@
             </aside>
         <?php endif; ?>
 
-        <main class="content">
-            <?php if (session()->get('user_id')): ?>
-                <div class="topbar">
-                    <div>
-                        <strong><?= esc(session()->get('user_name') ?? 'Staff') ?></strong>
+        <main class="content <?= $isLoggedIn ? '' : 'auth-content' ?>">
+            <?php if ($isLoggedIn): ?>
+                <div class="topbar user-bar">
+                    <div class="page-heading">
+                        <span class="page-eyebrow">Point of Sale</span>
+                        <strong><?= esc($pageTitle) ?></strong>
                     </div>
-                    <form method="post" action="/logout">
-                        <?= csrf_field() ?>
-                        <button type="submit" class="btn secondary">Logout</button>
-                    </form>
+                    <div class="account-menu">
+                        <div class="user-name" data-initial="<?= esc($userInitial, 'attr') ?>">
+                            <span>
+                                <small>Signed in as</small>
+                                <strong><?= esc($displayName) ?></strong>
+                            </span>
+                        </div>
+                        <form method="post" action="/logout">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="btn secondary logout-btn">Logout</button>
+                        </form>
+                    </div>
                 </div>
             <?php endif; ?>
 

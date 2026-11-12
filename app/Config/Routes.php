@@ -13,6 +13,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/products', 'ProductsController::index');
     $routes->match(['get', 'post'], '/products/new', 'ProductsController::save');
     $routes->match(['get', 'post'], '/products/edit/(:num)', 'ProductsController::save/$1');
+    $routes->post('/products/image/(:num)', 'ProductsController::uploadImage/$1');
     $routes->post('/products/delete/(:num)', 'ProductsController::delete/$1');
 
     $routes->get('/customers', 'CustomersController::index');

@@ -47,25 +47,47 @@ class ProductsController extends BaseController
             ];
 
             $uploadedFile = $this->request->getFile('image');
+            $newImageAbsolutePath = null;
             if ($uploadedFile && $uploadedFile->isValid() && !$uploadedFile->hasMoved()) {
-                $newName = $uploadedFile->getRandomName();
-                $uploadedFile->move(FCPATH . 'uploads/products', $newName);
-                $productData['image'] = 'uploads/products/' . $newName;
+                $uploadDirectory = FCPATH . 'uploads/products';
+                if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
+                    return redirect()->back()->withInput()->with('error', 'The product image directory is not available.');
+                }
 
-                if ($id !== null) {
-                    if (!empty($existing['image']) && file_exists(FCPATH . $existing['image'])) {
-                        unlink(FCPATH . $existing['image']);
-                    }
+                try {
+                    $newName = $uploadedFile->getRandomName();
+                    $uploadedFile->move($uploadDirectory, $newName);
+                    $productData['image'] = 'uploads/products/' . $newName;
+                    $newImageAbsolutePath = $uploadDirectory . DIRECTORY_SEPARATOR . $newName;
+                } catch (\Throwable $exception) {
+                    return redirect()->back()->withInput()->with('error', 'The product image could not be uploaded.');
                 }
             }
 
             if ($id === null) {
-                $this->productModel->insert($productData);
-                session()->setFlashdata('success', 'Product added successfully.');
+                $saved = $this->productModel->insert($productData) !== false;
+                $successMessage = 'Product added successfully.';
             } else {
-                $this->productModel->update($id, $productData);
-                session()->setFlashdata('success', 'Product updated successfully.');
+                $saved = $this->productModel->update($id, $productData);
+                $successMessage = 'Product updated successfully.';
             }
+
+            if (!$saved) {
+                if ($newImageAbsolutePath !== null && file_exists($newImageAbsolutePath)) {
+                    unlink($newImageAbsolutePath);
+                }
+
+                return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
+            }
+
+            if ($id !== null && $newImageAbsolutePath !== null && !empty($existing['image'])) {
+                $oldImageAbsolutePath = FCPATH . $existing['image'];
+                if (file_exists($oldImageAbsolutePath)) {
+                    unlink($oldImageAbsolutePath);
+                }
+            }
+
+            session()->setFlashdata('success', $successMessage);
 
             return redirect()->to('/products');
         }
@@ -91,5 +113,53 @@ class ProductsController extends BaseController
         }
 
         return redirect()->to('/products');
+    }
+
+    public function uploadImage($id)
+    {
+        $product = $this->productModel->find($id);
+        if (!$product) {
+            return redirect()->to('/products')->with('error', 'Product not found.');
+        }
+
+        $rules = [
+            'image' => 'uploaded[image]|max_size[image,2048]|mime_in[image,image/jpeg,image/png,image/webp]|ext_in[image,jpg,jpeg,png,webp]|is_image[image]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->to('/products')->with('errors', $this->validator->getErrors());
+        }
+
+        $uploadedFile = $this->request->getFile('image');
+        $uploadDirectory = FCPATH . 'uploads/products';
+        if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
+            return redirect()->to('/products')->with('error', 'The product image directory is not available.');
+        }
+
+        try {
+            $newName = $uploadedFile->getRandomName();
+            $uploadedFile->move($uploadDirectory, $newName);
+        } catch (\Throwable $exception) {
+            return redirect()->to('/products')->with('error', 'The product image could not be uploaded.');
+        }
+
+        $newImagePath = 'uploads/products/' . $newName;
+        $newImageAbsolutePath = $uploadDirectory . DIRECTORY_SEPARATOR . $newName;
+        if (!$this->productModel->update($id, ['image' => $newImagePath])) {
+            if (file_exists($newImageAbsolutePath)) {
+                unlink($newImageAbsolutePath);
+            }
+
+            return redirect()->to('/products')->with('errors', $this->productModel->errors());
+        }
+
+        if (!empty($product['image'])) {
+            $oldImageAbsolutePath = FCPATH . $product['image'];
+            if (file_exists($oldImageAbsolutePath)) {
+                unlink($oldImageAbsolutePath);
+            }
+        }
+
+        return redirect()->to('/products')->with('success', 'Product image updated successfully.');
     }
 }

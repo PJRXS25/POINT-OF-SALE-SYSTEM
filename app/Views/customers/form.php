@@ -1,18 +1,21 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 <?php $fieldErrors = session()->getFlashdata('errors') ?? []; ?>
-<div class="card">
-    <h2><?= $mode === 'edit' ? 'Edit Customer' : 'Add Customer' ?></h2>
+<div class="card form-card">
+    <div class="form-heading">
+        <h2><?= $mode === 'edit' ? 'Edit customer' : 'Create a customer' ?></h2>
+        <p><?= $mode === 'edit' ? 'Keep this customer’s contact details up to date.' : 'Save customer details for faster future transactions.' ?></p>
+    </div>
     <form method="post" action="<?= $mode === 'edit' ? '/customers/edit/' . esc($customer['id'], 'url') : '/customers/new' ?>">
         <?= csrf_field() ?>
         <div class="form-grid">
             <div class="field">
-                <label>Full Name</label>
+                <label>Full name <span class="required-mark">*</span></label>
                 <input type="text" name="full_name" value="<?= esc(old('full_name', $customer['full_name'] ?? '')) ?>" required>
                 <?php if (isset($fieldErrors['full_name'])): ?><span class="field-error"><?= esc($fieldErrors['full_name']) ?></span><?php endif; ?>
             </div>
             <div class="field">
-                <label>Email</label>
+                <label>Email address <span class="required-mark">*</span></label>
                 <input type="email" name="email" value="<?= esc(old('email', $customer['email'] ?? '')) ?>" required>
                 <?php if (isset($fieldErrors['email'])): ?><span class="field-error"><?= esc($fieldErrors['email']) ?></span><?php endif; ?>
             </div>
@@ -22,8 +25,8 @@
                 <?php if (isset($fieldErrors['phone'])): ?><span class="field-error"><?= esc($fieldErrors['phone']) ?></span><?php endif; ?>
             </div>
         </div>
-        <div style="margin-top: 18px; display:flex; gap:12px;">
-            <button type="submit" class="btn">Save</button>
+        <div class="form-actions">
+            <button type="submit" class="btn"><?= $mode === 'edit' ? 'Save changes' : 'Create customer' ?></button>
             <a href="/customers" class="btn secondary">Cancel</a>
         </div>
     </form>

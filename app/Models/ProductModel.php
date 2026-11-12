@@ -20,7 +20,8 @@ class ProductModel extends Model
         'name' => 'required|max_length[100]',
         'price' => 'required|decimal|greater_than[0]',
         'stock_quantity' => 'required|integer|greater_than_equal_to[0]',
-        'image' => 'permit_empty|max_size[image,2048]|mime_in[image,image/jpeg,image/png,image/webp]|ext_in[image,jpg,jpeg,png,webp]|is_image[image]',
+        // Uploaded files are validated by the controller before this path is saved.
+        'image' => 'permit_empty|max_length[255]',
     ];
 
     public function getAvailableProducts()

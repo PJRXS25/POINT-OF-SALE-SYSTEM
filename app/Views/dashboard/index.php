@@ -1,54 +1,48 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
-<h2>Dashboard</h2>
-<div class="stats-grid">
-    <div class="stat-card">
-        <div>Total Products</div>
-        <h3><?= esc($totalProducts ?? 0) ?></h3>
+<div class="module-toolbar">
+    <div class="module-intro">
+        <h2>Business overview</h2>
+        <p>A quick summary of your store's current activity.</p>
     </div>
-    <div class="stat-card">
-        <div>Total Customers</div>
-        <h3><?= esc($totalCustomers ?? 0) ?></h3>
-    </div>
-    <div class="stat-card">
-        <div>Total Staff</div>
-        <h3><?= esc($totalStaff ?? 0) ?></h3>
-    </div>
-    <div class="stat-card">
-        <div>Total Sales</div>
-        <h3><?= esc($totalSales ?? 0) ?></h3>
-    </div>
+    <div class="module-actions"><a href="/sales/new" class="btn">Record a sale</a></div>
 </div>
 
-<div class="card">
-    <h3>Sales Amount</h3>
-    <h2>$<?= esc(number_format((float) ($salesTotal ?? 0), 2)) ?></h2>
+<div class="metric-grid">
+    <article class="metric-card"><span class="metric-icon">PR</span><span class="metric-label">Products</span><strong class="metric-value"><?= esc($totalProducts ?? 0) ?></strong></article>
+    <article class="metric-card green"><span class="metric-icon">CU</span><span class="metric-label">Customers</span><strong class="metric-value"><?= esc($totalCustomers ?? 0) ?></strong></article>
+    <article class="metric-card violet"><span class="metric-icon">ST</span><span class="metric-label">Staff members</span><strong class="metric-value"><?= esc($totalStaff ?? 0) ?></strong></article>
+    <article class="metric-card orange"><span class="metric-icon">SL</span><span class="metric-label">Transactions</span><strong class="metric-value"><?= esc($totalSales ?? 0) ?></strong></article>
+    <article class="metric-card rose"><span class="metric-icon">AM</span><span class="metric-label">Sales amount</span><strong class="metric-value">$<?= esc(number_format((float) ($salesTotal ?? 0), 2)) ?></strong></article>
 </div>
 
-<div class="stats-grid" style="margin-top: 20px;">
-    <div class="card">
-        <h3>Low Stock</h3>
+<div class="dashboard-grid">
+    <section class="card">
+        <div class="section-heading"><h3>Low-stock products</h3><span>10 units or fewer</span></div>
         <?php if (!empty($lowStockProducts)): ?>
-            <ul>
+            <ul class="activity-list">
                 <?php foreach ($lowStockProducts as $product): ?>
-                    <li><?= esc($product['name']) ?> - <?= esc($product['stock_quantity']) ?> left</li>
+                    <li class="activity-item">
+                        <span class="activity-main"><strong><?= esc($product['name']) ?></strong><small>Inventory attention required</small></span>
+                        <span class="badge <?= (int) $product['stock_quantity'] <= 3 ? 'danger' : 'warning' ?>"><?= esc($product['stock_quantity']) ?> left</span>
+                    </li>
                 <?php endforeach; ?>
             </ul>
-        <?php else: ?>
-            <p>No low-stock products.</p>
-        <?php endif; ?>
-    </div>
-    <div class="card">
-        <h3>Recent Sales</h3>
+        <?php else: ?><div class="empty-state">Inventory levels look healthy.</div><?php endif; ?>
+    </section>
+
+    <section class="card">
+        <div class="section-heading"><h3>Recent sales</h3><a href="/sales">View history</a></div>
         <?php if (!empty($recentSales)): ?>
-            <ul>
+            <ul class="activity-list">
                 <?php foreach ($recentSales as $sale): ?>
-                    <li><?= esc($sale['product_name']) ?> × <?= esc($sale['quantity']) ?> - $<?= esc(number_format((float) $sale['total_price'], 2)) ?></li>
+                    <li class="activity-item">
+                        <span class="activity-main"><strong><?= esc($sale['product_name']) ?> &times; <?= esc($sale['quantity']) ?></strong><small>Processed by <?= esc($sale['sold_by_name'] ?? 'Staff') ?></small></span>
+                        <span class="activity-value">$<?= esc(number_format((float) $sale['total_price'], 2)) ?></span>
+                    </li>
                 <?php endforeach; ?>
             </ul>
-        <?php else: ?>
-            <p>No sales recorded yet.</p>
-        <?php endif; ?>
-    </div>
+        <?php else: ?><div class="empty-state">No sales have been recorded yet.</div><?php endif; ?>
+    </section>
 </div>
 <?= $this->endSection() ?>

@@ -133,6 +133,8 @@ _modules/*
 /public/uploads/*
 !/public/uploads/.htaccess
 !/public/uploads/products/
+/public/uploads/products/*
 !/public/uploads/products/.gitkeep
 !/public/uploads/avatars/
+/public/uploads/avatars/*
 !/public/uploads/avatars/.gitkeep

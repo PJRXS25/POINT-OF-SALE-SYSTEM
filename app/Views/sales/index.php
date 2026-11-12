@@ -1,8 +1,11 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
-<div class="topbar">
-    <h2>Sales History</h2>
-    <a href="/sales/new" class="btn">Record Sale</a>
+<div class="module-toolbar">
+    <div class="module-intro">
+        <h2>Transaction history</h2>
+        <p>Review sales by product, customer, or staff member.</p>
+    </div>
+    <div class="module-actions"><a href="/sales/new" class="btn">Record sale</a></div>
 </div>
 
 <div class="card">
@@ -26,15 +29,15 @@
         </thead>
         <tbody>
             <?php if (empty($sales)): ?>
-                <tr><td colspan="6">No sales found.</td></tr>
+                <tr><td colspan="6" class="empty-state">No sales match your search.</td></tr>
             <?php endif; ?>
             <?php foreach ($sales as $sale): ?>
                 <tr>
-                    <td><?= esc($sale['product_name'] ?? '-') ?></td>
-                    <td><?= esc($sale['customer_name'] ?? 'Walk-in Customer') ?></td>
+                    <td><div class="record-details"><strong><?= esc($sale['product_name'] ?? '-') ?></strong><small>Sale #<?= esc($sale['id']) ?></small></div></td>
+                    <td><span class="badge"><?= esc($sale['customer_name'] ?? 'Walk-in Customer') ?></span></td>
                     <td><?= esc($sale['sold_by_name'] ?? '-') ?></td>
                     <td><?= esc($sale['quantity']) ?></td>
-                    <td>$<?= esc(number_format((float) $sale['total_price'], 2)) ?></td>
+                    <td><strong>$<?= esc(number_format((float) $sale['total_price'], 2)) ?></strong></td>
                     <td><?= esc(date('Y-m-d', strtotime($sale['created_at']))) ?></td>
                 </tr>
             <?php endforeach; ?>

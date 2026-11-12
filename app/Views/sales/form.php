@@ -1,13 +1,16 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 <?php $fieldErrors = session()->getFlashdata('errors') ?? []; ?>
-<div class="card">
-    <h2>Record Sale</h2>
+<div class="card form-card">
+    <div class="form-heading">
+        <h2>Record a new sale</h2>
+        <p>Select a product and quantity. Stock is updated automatically after checkout.</p>
+    </div>
     <form method="post" action="/sales/new">
         <?= csrf_field() ?>
         <div class="form-grid">
             <div class="field">
-                <label>Product</label>
+                <label>Product <span class="required-mark">*</span></label>
                 <select name="product_id" required>
                     <option value="">Select Product</option>
                     <?php foreach ($products as $product): ?>
@@ -27,13 +30,13 @@
                 <?php if (isset($fieldErrors['customer_id'])): ?><span class="field-error"><?= esc($fieldErrors['customer_id']) ?></span><?php endif; ?>
             </div>
             <div class="field">
-                <label>Quantity</label>
+                <label>Quantity <span class="required-mark">*</span></label>
                 <input type="number" min="1" name="quantity" value="<?= old('quantity') ?? 1 ?>" required>
                 <?php if (isset($fieldErrors['quantity'])): ?><span class="field-error"><?= esc($fieldErrors['quantity']) ?></span><?php endif; ?>
             </div>
         </div>
-        <div style="margin-top: 18px; display:flex; gap:12px;">
-            <button type="submit" class="btn">Save Sale</button>
+        <div class="form-actions">
+            <button type="submit" class="btn">Complete sale</button>
             <a href="/sales" class="btn secondary">View History</a>
         </div>
     </form>
