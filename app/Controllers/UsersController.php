@@ -2,15 +2,18 @@
 
 namespace App\Controllers;
 
+use App\Libraries\MediaStorage;
 use App\Models\UserModel;
 
 class UsersController extends BaseController
 {
     protected UserModel $userModel;
+    protected MediaStorage $mediaStorage;
 
     public function __construct()
     {
         $this->userModel = model(UserModel::class);
+        $this->mediaStorage = new MediaStorage();
     }
 
     public function index()
@@ -27,13 +30,17 @@ class UsersController extends BaseController
             return redirect()->to('/users')->with('error', 'Staff account not found.');
         }
 
-        if ($this->request->getMethod() === 'post') {
+        if ($this->request->is('post')) {
             $rules = [
                 'username' => 'required|min_length[3]|max_length[50]|alpha_numeric' . ($id !== null ? '|is_unique[users.username,id,' . $id . ']' : '|is_unique[users.username]'),
                 'full_name' => 'required|max_length[100]',
-                'password' => $id === null ? 'required|min_length[6]' : 'permit_empty|min_length[6]',
-                'avatar' => 'permit_empty|max_size[avatar,2048]|mime_in[avatar,image/jpeg,image/png,image/webp]|ext_in[avatar,jpg,jpeg,png,webp]|is_image[avatar]',
+                'password' => $id === null ? 'required|min_length[8]|max_length[72]' : 'permit_empty|min_length[8]|max_length[72]',
             ];
+
+            $uploadedFile = $this->request->getFile('avatar');
+            if ($uploadedFile && $uploadedFile->getError() !== UPLOAD_ERR_NO_FILE) {
+                $rules['avatar'] = 'uploaded[avatar]|max_size[avatar,2048]|mime_in[avatar,image/jpeg,image/png,image/webp]|ext_in[avatar,jpg,jpeg,png,webp]|is_image[avatar]';
+            }
 
             if (!$this->validate($rules)) {
                 return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
@@ -48,26 +55,34 @@ class UsersController extends BaseController
                 $data['password'] = $this->request->getPost('password');
             }
 
-            $uploadedFile = $this->request->getFile('avatar');
+            $newAvatar = null;
             if ($uploadedFile && $uploadedFile->isValid() && !$uploadedFile->hasMoved()) {
-                $newName = $uploadedFile->getRandomName();
-                $uploadedFile->move(FCPATH . 'uploads/avatars', $newName);
-                $data['avatar'] = 'uploads/avatars/' . $newName;
-
-                if ($id !== null) {
-                    if (!empty($existing['avatar']) && file_exists(FCPATH . $existing['avatar'])) {
-                        unlink(FCPATH . $existing['avatar']);
-                    }
+                try {
+                    $newAvatar = $this->mediaStorage->store($uploadedFile, 'avatars');
+                    $data['avatar'] = $newAvatar;
+                } catch (\Throwable $exception) {
+                    return redirect()->back()->withInput()->with('error', 'The staff avatar could not be uploaded.');
                 }
             }
 
             if ($id === null) {
-                $this->userModel->insert($data);
-                session()->setFlashdata('success', 'Staff account created successfully.');
+                $saved = $this->userModel->insert($data) !== false;
+                $successMessage = 'Staff account created successfully.';
             } else {
-                $this->userModel->update($id, $data);
-                session()->setFlashdata('success', 'Staff account updated successfully.');
+                $saved = $this->userModel->update($id, $data);
+                $successMessage = 'Staff account updated successfully.';
             }
+
+            if (!$saved) {
+                $this->mediaStorage->delete($newAvatar);
+                return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            }
+
+            if ($id !== null && $newAvatar !== null && !empty($existing['avatar'])) {
+                $this->mediaStorage->delete($existing['avatar']);
+            }
+
+            session()->setFlashdata('success', $successMessage);
 
             return redirect()->to('/users');
         }
@@ -91,9 +106,7 @@ class UsersController extends BaseController
                 return redirect()->to('/users')->with('error', 'This staff account cannot be deleted because it is used in sales history.');
             }
             if ($deleted) {
-                if (!empty($user['avatar']) && file_exists(FCPATH . $user['avatar'])) {
-                    unlink(FCPATH . $user['avatar']);
-                }
+                $this->mediaStorage->delete($user['avatar'] ?? null);
                 session()->setFlashdata('success', 'Staff deleted successfully.');
             }
         }

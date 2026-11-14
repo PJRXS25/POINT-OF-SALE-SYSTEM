@@ -7,7 +7,7 @@
             <form method="post" action="/shop/cart/update" class="portal-card cart-items"><?= csrf_field() ?>
                 <?php foreach ($items as $item): $product = $item['product']; ?>
                     <div class="cart-row">
-                        <div class="cart-thumb"><?php if (!empty($product['image']) && file_exists(FCPATH . $product['image'])): ?><img src="/<?= esc($product['image']) ?>" alt=""><?php else: ?><span><?= esc(strtoupper(mb_substr($product['name'], 0, 2))) ?></span><?php endif; ?></div>
+                        <div class="cart-thumb"><?php $productImageUrl = media_url($product['image'] ?? null); if ($productImageUrl): ?><img src="<?= esc($productImageUrl, 'attr') ?>" alt=""><?php else: ?><span><?= esc(strtoupper(mb_substr($product['name'], 0, 2))) ?></span><?php endif; ?></div>
                         <div class="cart-name"><strong><?= esc($product['name']) ?></strong><span>$<?= esc(number_format((float) $product['price'], 2)) ?> each</span></div>
                         <input type="number" name="quantities[<?= esc($product['id']) ?>]" value="<?= esc($item['quantity']) ?>" min="0" max="<?= esc($product['stock_quantity']) ?>" aria-label="Quantity for <?= esc($product['name']) ?>">
                         <strong class="cart-subtotal">$<?= esc(number_format($item['subtotal'], 2)) ?></strong>

@@ -1,0 +1,13 @@
+.git
+.github
+.env
+build
+tests
+vendor
+writable/cache/*
+writable/debugbar/*
+writable/logs/*
+writable/session/*
+writable/uploads/*
+public/uploads/products/*
+public/uploads/avatars/*

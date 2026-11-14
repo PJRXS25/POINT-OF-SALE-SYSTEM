@@ -24,8 +24,8 @@
                 <tr>
                     <td>
                         <span class="record-image round">
-                            <?php if (!empty($user['avatar']) && file_exists(FCPATH . $user['avatar'])): ?>
-                                <img src="/<?= esc($user['avatar']) ?>" alt="<?= esc($user['full_name']) ?>">
+                            <?php $avatarUrl = media_url($user['avatar'] ?? null); if ($avatarUrl): ?>
+                                <img src="<?= esc($avatarUrl, 'attr') ?>" alt="<?= esc($user['full_name']) ?>">
                             <?php else: ?><?= esc(strtoupper(mb_substr($user['full_name'], 0, 2))) ?><?php endif; ?>
                         </span>
                     </td>

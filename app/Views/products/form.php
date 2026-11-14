@@ -28,8 +28,8 @@
                 <label>Product image</label>
                 <div class="image-upload-box">
                     <div class="image-preview" id="imagePreview">
-                        <?php if (!empty($product['image']) && file_exists(FCPATH . $product['image'])): ?>
-                            <img src="/<?= esc($product['image']) ?>" alt="Current image for <?= esc($product['name']) ?>">
+                        <?php $productImageUrl = media_url($product['image'] ?? null); if ($productImageUrl): ?>
+                            <img src="<?= esc($productImageUrl, 'attr') ?>" alt="Current image for <?= esc($product['name']) ?>">
                         <?php else: ?>
                             <span>Image preview</span>
                         <?php endif; ?>

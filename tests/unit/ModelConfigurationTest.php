@@ -28,4 +28,15 @@ final class ModelConfigurationTest extends CIUnitTestCase
         $this->assertNotSame('example-password', $result['data']['password']);
         $this->assertTrue(password_verify('example-password', $result['data']['password']));
     }
+
+    public function testCustomerPasswordIsHashedOnlyOnce(): void
+    {
+        $model = (new ReflectionClass(CustomerModel::class))->newInstanceWithoutConstructor();
+        $method = new ReflectionMethod($model, 'hashPassword');
+        $first = $method->invoke($model, ['data' => ['password' => 'customer-password']]);
+        $second = $method->invoke($model, ['data' => ['password' => $first['data']['password']]]);
+
+        $this->assertTrue(password_verify('customer-password', $first['data']['password']));
+        $this->assertSame($first['data']['password'], $second['data']['password']);
+    }
 }

@@ -23,8 +23,11 @@
 # app.baseURL = ''
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
-# app.forceGlobalSecureRequests = false
+# app.forceGlobalSecureRequests = true
 # app.CSPEnabled = false
+
+# Production cookies must only be sent over HTTPS.
+# cookie.secure = true
 
 #--------------------------------------------------------------------
 # DATABASE
@@ -37,6 +40,10 @@
 # database.default.DBDriver = MySQLi
 # database.default.DBPrefix =
 # database.default.port = 3306
+
+# Railway MySQL deployments expose MYSQLHOST, MYSQLDATABASE, MYSQLUSER,
+# MYSQLPASSWORD, and MYSQLPORT. The application maps those variables
+# automatically when MYSQLHOST is present.
 
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost
@@ -59,8 +66,17 @@
 # SESSION
 #--------------------------------------------------------------------
 
-# session.driver = 'CodeIgniter\Session\Handlers\FileHandler'
-# session.savePath = null
+# session.driver = 'CodeIgniter\Session\Handlers\DatabaseHandler'
+# session.savePath = ci_sessions
+
+# Required only when running the development data seeder.
+# seed.adminPassword =
+
+# Use "local" for XAMPP and "database" for stateless production deployments.
+# media.storage = local
+
+# The production Docker image defaults to database-backed media storage so
+# uploaded product images and avatars survive stateless container redeploys.
 
 #--------------------------------------------------------------------
 # LOGGER

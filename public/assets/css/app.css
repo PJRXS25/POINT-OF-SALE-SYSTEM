@@ -469,7 +469,7 @@ input[type="file"] { padding: 7px 9px; }
 
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(155px, 1fr));
+    grid-template-columns: repeat(3, minmax(190px, 1fr));
     gap: 14px;
     margin-bottom: 18px;
 }
@@ -498,6 +498,7 @@ input[type="file"] { padding: 7px 9px; }
 }
 .metric-label { display: block; color: var(--muted); font-size: 0.78rem; font-weight: 700; }
 .metric-value { display: block; margin-top: 12px; color: #0f172a; font-size: 1.85rem; font-weight: 800; letter-spacing: -0.04em; }
+.metric-card > small { position: relative; z-index: 1; display: block; margin-top: 2px; color: var(--muted); font-size: .7rem; font-weight: 700; }
 .metric-icon {
     display: grid;
     width: 34px;
@@ -542,16 +543,27 @@ input[type="file"] { padding: 7px 9px; }
     background: linear-gradient(145deg, #ffffff 45%, #fff1f2 100%);
     box-shadow: 0 5px 16px rgba(225, 29, 72, 0.08);
 }
+.metric-card.cyan {
+    --metric-soft: #cffafe;
+    --metric-color: #0891b2;
+    border-color: #a5f3fc;
+    border-top-color: var(--metric-color);
+    background: linear-gradient(145deg, #ffffff 45%, #ecfeff 100%);
+    box-shadow: 0 5px 16px rgba(8, 145, 178, 0.08);
+}
 
-.dashboard-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 18px; }
-.dashboard-grid .card:first-child {
+.dashboard-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.dashboard-grid .stock-card {
     border-top: 3px solid #f59e0b;
     background: linear-gradient(180deg, #fffbeb 0, #ffffff 72px);
 }
-.dashboard-grid .card:last-child {
+.dashboard-grid .sales-card {
     border-top: 3px solid #2563eb;
     background: linear-gradient(180deg, #eff6ff 0, #ffffff 72px);
 }
+.dashboard-grid .orders-card { grid-column: 1 / -1; border-top: 3px solid #0891b2; background: linear-gradient(180deg, #ecfeff 0, #ffffff 72px); }
+.order-activity-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.order-activity-meta > strong { color: #0f172a; font-size: .86rem; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .section-heading h3 { margin: 0; color: #0f172a; font-size: 1rem; }
 .section-heading span { color: var(--muted); font-size: 0.76rem; }

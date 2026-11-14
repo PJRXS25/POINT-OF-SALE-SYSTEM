@@ -6,6 +6,29 @@ use CodeIgniter\Config\BaseConfig;
 
 class App extends BaseConfig
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $e2eBaseUrl = getenv('E2E_APP_BASE_URL');
+        if (is_string($e2eBaseUrl) && $e2eBaseUrl !== '') {
+            $this->baseURL = rtrim($e2eBaseUrl, '/') . '/';
+            return;
+        }
+
+        // An explicitly configured URL always wins, including custom domains.
+        $configuredBaseUrl = env('app.baseURL', env('app_baseURL'));
+        if (is_string($configuredBaseUrl) && $configuredBaseUrl !== '') {
+            return;
+        }
+
+        // Railway provides the generated public hostname at runtime.
+        $platformHost = getenv('RAILWAY_PUBLIC_DOMAIN');
+        if (is_string($platformHost) && $platformHost !== '') {
+            $this->baseURL = 'https://' . rtrim($platformHost, '/') . '/';
+        }
+    }
+
     /**
      * --------------------------------------------------------------------------
      * Base Site URL

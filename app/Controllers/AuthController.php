@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\LoginThrottle;
 use App\Models\UserModel;
 
 class AuthController extends BaseController
@@ -31,6 +32,12 @@ class AuthController extends BaseController
         $username = trim($this->request->getPost('username'));
         $password = $this->request->getPost('password');
 
+        $throttle = new LoginThrottle();
+        $throttleKey = 'staff-login:' . $this->request->getIPAddress();
+        if (!$throttle->allows($throttleKey, 5, 60)) {
+            return redirect()->back()->withInput()->with('error', 'Too many login attempts. Please wait one minute and try again.');
+        }
+
         if ($username === '' || $password === '') {
             return redirect()->back()->withInput()->with('error', 'Username and password are required.');
         }
@@ -38,7 +45,8 @@ class AuthController extends BaseController
         $user = $this->userModel->findByUsername($username);
 
         if ($user && password_verify($password, $user['password'])) {
-            session()->regenerate();
+            $throttle->clear($throttleKey);
+            session()->regenerate(true);
             session()->set([
                 'user_id' => $user['id'],
                 'user_name' => $user['full_name'],

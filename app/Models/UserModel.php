@@ -19,7 +19,7 @@ class UserModel extends Model
     protected $validationRules = [
         'username' => 'required|min_length[3]|max_length[50]|alpha_numeric',
         'full_name' => 'required|max_length[100]',
-        'password' => 'permit_empty|min_length[6]',
+        'password' => 'permit_empty|min_length[8]|max_length[255]',
         'avatar' => 'permit_empty|max_size[avatar,2048]|mime_in[avatar,image/jpeg,image/png,image/webp]|ext_in[avatar,jpg,jpeg,png,webp]|is_image[avatar]',
     ];
 

@@ -37,7 +37,7 @@ class SalesController extends BaseController
 
     public function save()
     {
-        if ($this->request->getMethod() === 'post') {
+        if ($this->request->is('post')) {
             $rules = [
                 'product_id' => 'required|integer',
                 'quantity' => 'required|integer|greater_than[0]',

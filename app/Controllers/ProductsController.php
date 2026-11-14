@@ -2,15 +2,18 @@
 
 namespace App\Controllers;
 
+use App\Libraries\MediaStorage;
 use App\Models\ProductModel;
 
 class ProductsController extends BaseController
 {
     protected ProductModel $productModel;
+    protected MediaStorage $mediaStorage;
 
     public function __construct()
     {
         $this->productModel = model(ProductModel::class);
+        $this->mediaStorage = new MediaStorage();
     }
 
     public function index()
@@ -27,14 +30,17 @@ class ProductsController extends BaseController
             return redirect()->to('/products')->with('error', 'Product not found.');
         }
 
-        if ($this->request->getMethod() === 'post') {
+        if ($this->request->is('post')) {
             $rules = [
                 'name' => 'required|max_length[100]',
                 'price' => 'required|decimal|greater_than[0]',
                 'stock_quantity' => 'required|integer|greater_than_equal_to[0]',
             ];
 
-            $rules['image'] = 'permit_empty|max_size[image,2048]|mime_in[image,image/jpeg,image/png,image/webp]|ext_in[image,jpg,jpeg,png,webp]|is_image[image]';
+            $uploadedFile = $this->request->getFile('image');
+            if ($uploadedFile && $uploadedFile->getError() !== UPLOAD_ERR_NO_FILE) {
+                $rules['image'] = 'uploaded[image]|max_size[image,2048]|mime_in[image,image/jpeg,image/png,image/webp]|ext_in[image,jpg,jpeg,png,webp]|is_image[image]';
+            }
 
             if (!$this->validate($rules)) {
                 return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
@@ -46,19 +52,11 @@ class ProductsController extends BaseController
                 'stock_quantity' => (int) $this->request->getPost('stock_quantity'),
             ];
 
-            $uploadedFile = $this->request->getFile('image');
-            $newImageAbsolutePath = null;
+            $newImage = null;
             if ($uploadedFile && $uploadedFile->isValid() && !$uploadedFile->hasMoved()) {
-                $uploadDirectory = FCPATH . 'uploads/products';
-                if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
-                    return redirect()->back()->withInput()->with('error', 'The product image directory is not available.');
-                }
-
                 try {
-                    $newName = $uploadedFile->getRandomName();
-                    $uploadedFile->move($uploadDirectory, $newName);
-                    $productData['image'] = 'uploads/products/' . $newName;
-                    $newImageAbsolutePath = $uploadDirectory . DIRECTORY_SEPARATOR . $newName;
+                    $newImage = $this->mediaStorage->store($uploadedFile, 'products');
+                    $productData['image'] = $newImage;
                 } catch (\Throwable $exception) {
                     return redirect()->back()->withInput()->with('error', 'The product image could not be uploaded.');
                 }
@@ -73,18 +71,13 @@ class ProductsController extends BaseController
             }
 
             if (!$saved) {
-                if ($newImageAbsolutePath !== null && file_exists($newImageAbsolutePath)) {
-                    unlink($newImageAbsolutePath);
-                }
+                $this->mediaStorage->delete($newImage);
 
                 return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
             }
 
-            if ($id !== null && $newImageAbsolutePath !== null && !empty($existing['image'])) {
-                $oldImageAbsolutePath = FCPATH . $existing['image'];
-                if (file_exists($oldImageAbsolutePath)) {
-                    unlink($oldImageAbsolutePath);
-                }
+            if ($id !== null && $newImage !== null && !empty($existing['image'])) {
+                $this->mediaStorage->delete($existing['image']);
             }
 
             session()->setFlashdata('success', $successMessage);
@@ -105,9 +98,7 @@ class ProductsController extends BaseController
                 return redirect()->to('/products')->with('error', 'This product cannot be deleted because it is used in sales history.');
             }
             if ($deleted) {
-                if (!empty($product['image']) && file_exists(FCPATH . $product['image'])) {
-                    unlink(FCPATH . $product['image']);
-                }
+                $this->mediaStorage->delete($product['image'] ?? null);
                 session()->setFlashdata('success', 'Product deleted successfully.');
             }
         }
@@ -131,33 +122,20 @@ class ProductsController extends BaseController
         }
 
         $uploadedFile = $this->request->getFile('image');
-        $uploadDirectory = FCPATH . 'uploads/products';
-        if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
-            return redirect()->to('/products')->with('error', 'The product image directory is not available.');
-        }
-
         try {
-            $newName = $uploadedFile->getRandomName();
-            $uploadedFile->move($uploadDirectory, $newName);
+            $newImagePath = $this->mediaStorage->store($uploadedFile, 'products');
         } catch (\Throwable $exception) {
             return redirect()->to('/products')->with('error', 'The product image could not be uploaded.');
         }
 
-        $newImagePath = 'uploads/products/' . $newName;
-        $newImageAbsolutePath = $uploadDirectory . DIRECTORY_SEPARATOR . $newName;
         if (!$this->productModel->update($id, ['image' => $newImagePath])) {
-            if (file_exists($newImageAbsolutePath)) {
-                unlink($newImageAbsolutePath);
-            }
+            $this->mediaStorage->delete($newImagePath);
 
             return redirect()->to('/products')->with('errors', $this->productModel->errors());
         }
 
         if (!empty($product['image'])) {
-            $oldImageAbsolutePath = FCPATH . $product['image'];
-            if (file_exists($oldImageAbsolutePath)) {
-                unlink($oldImageAbsolutePath);
-            }
+            $this->mediaStorage->delete($product['image']);
         }
 
         return redirect()->to('/products')->with('success', 'Product image updated successfully.');

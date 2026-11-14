@@ -194,6 +194,51 @@ class Database extends Config
     {
         parent::__construct();
 
+        $e2eHost = getenv('E2E_DB_HOST');
+        if (ENVIRONMENT !== 'testing' && is_string($e2eHost) && $e2eHost !== '') {
+            $e2eVariables = [
+                'hostname' => 'E2E_DB_HOST',
+                'username' => 'E2E_DB_USERNAME',
+                'password' => 'E2E_DB_PASSWORD',
+                'database' => 'E2E_DB_DATABASE',
+                'port'     => 'E2E_DB_PORT',
+                'DBDriver' => 'E2E_DB_DRIVER',
+            ];
+
+            foreach ($e2eVariables as $configKey => $environmentKey) {
+                $value = getenv($environmentKey);
+                if ($value !== false) {
+                    $this->default[$configKey] = $configKey === 'port' ? (int) $value : $value;
+                }
+            }
+        }
+
+        // Railway's MySQL service exposes these standard variables. Map them
+        // after CodeIgniter loads its config so the application can connect
+        // without copying database secrets into source-controlled files.
+        if (ENVIRONMENT !== 'testing' && $e2eHost === false && getenv('MYSQLHOST') !== false) {
+            $railwayVariables = [
+                'hostname' => 'MYSQLHOST',
+                'username' => 'MYSQLUSER',
+                'password' => 'MYSQLPASSWORD',
+                'database' => 'MYSQLDATABASE',
+                'port'     => 'MYSQLPORT',
+            ];
+
+            foreach ($railwayVariables as $configKey => $environmentKey) {
+                $value = getenv($environmentKey);
+                if ($value !== false && $value !== '') {
+                    $this->default[$configKey] = $configKey === 'port' ? (int) $value : $value;
+                }
+            }
+
+            $this->default['DBDriver'] = 'MySQLi';
+        }
+
+        if (ENVIRONMENT === 'production') {
+            $this->default['DBDebug'] = false;
+        }
+
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
         // we don't overwrite live data on accident.

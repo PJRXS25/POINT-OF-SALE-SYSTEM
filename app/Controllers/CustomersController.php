@@ -27,7 +27,7 @@ class CustomersController extends BaseController
             return redirect()->to('/customers')->with('error', 'Customer not found.');
         }
 
-        if ($this->request->getMethod() === 'post') {
+        if ($this->request->is('post')) {
             $rules = [
                 'full_name' => 'required|max_length[100]',
                 'email' => 'required|valid_email|max_length[100]' . ($id !== null ? '|is_unique[customers.email,id,' . $id . ']' : '|is_unique[customers.email]'),

@@ -25,8 +25,8 @@
                 <tr>
                     <td>
                         <div class="record-image">
-                            <?php if (!empty($product['image']) && file_exists(FCPATH . $product['image'])): ?>
-                                <img src="/<?= esc($product['image']) ?>" alt="<?= esc($product['name']) ?>">
+                            <?php $productImageUrl = media_url($product['image'] ?? null); if ($productImageUrl): ?>
+                                <img src="<?= esc($productImageUrl, 'attr') ?>" alt="<?= esc($product['name']) ?>">
                             <?php else: ?><?= esc(strtoupper(mb_substr($product['name'], 0, 2))) ?><?php endif; ?>
                         </div>
                     </td>

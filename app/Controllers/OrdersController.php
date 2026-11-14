@@ -74,8 +74,8 @@ class OrdersController extends BaseController
         }
 
         $allowedTransitions = [
-            'pending' => ['confirmed'],
-            'confirmed' => ['ready'],
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['ready', 'cancelled'],
             'ready' => ['completed'],
         ];
         $newStatus = (string) $this->request->getPost('status');
@@ -83,7 +83,40 @@ class OrdersController extends BaseController
             return redirect()->back()->with('error', 'That order status change is not allowed.');
         }
 
-        if (!$this->orderModel->update($order['id'], ['status' => $newStatus])) {
+        if ($newStatus === 'cancelled') {
+            $db = db_connect();
+            $db->transBegin();
+
+            try {
+                $items = $this->orderItemModel->where('order_id', $order['id'])->findAll();
+                foreach ($items as $item) {
+                    $product = $db->query(
+                        'SELECT id, stock_quantity FROM products WHERE id = ? FOR UPDATE',
+                        [(int) $item['product_id']],
+                    )->getRowArray();
+                    if (!$product) {
+                        throw new \RuntimeException('An ordered product could not be found.');
+                    }
+
+                    $updated = $db->table('products')->where('id', $product['id'])->update([
+                        'stock_quantity' => (int) $product['stock_quantity'] + (int) $item['quantity'],
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    if (!$updated) {
+                        throw new \RuntimeException('Inventory could not be restored.');
+                    }
+                }
+
+                if (!$this->orderModel->update($order['id'], ['status' => 'cancelled']) || $db->transStatus() === false) {
+                    throw new \RuntimeException('The order could not be cancelled.');
+                }
+
+                $db->transCommit();
+            } catch (\Throwable $exception) {
+                $db->transRollback();
+                return redirect()->back()->with('error', 'The order could not be cancelled and inventory was not changed.');
+            }
+        } elseif (!$this->orderModel->update($order['id'], ['status' => $newStatus])) {
             return redirect()->back()->with('error', 'The order status could not be updated.');
         }
 

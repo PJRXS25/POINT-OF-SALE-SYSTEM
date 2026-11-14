@@ -26,4 +26,13 @@ class OrderModel extends Model
     {
         return $this->where(['id' => $orderId, 'customer_id' => $customerId])->first();
     }
+
+    public function getRecentWithCustomer(int $limit = 5): array
+    {
+        return $this->select('orders.*, customers.full_name AS customer_name')
+            ->join('customers', 'customers.id = orders.customer_id')
+            ->orderBy('orders.created_at', 'DESC')
+            ->limit($limit)
+            ->findAll();
+    }
 }

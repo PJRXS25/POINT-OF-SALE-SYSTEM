@@ -11,11 +11,16 @@ class DefaultDataSeeder extends Seeder
 {
     public function run()
     {
+        $adminPassword = (string) env('seed.adminPassword', env('seed_adminPassword', ''));
+        if (strlen($adminPassword) < 12) {
+            throw new \RuntimeException('Set seed.adminPassword to a unique password of at least 12 characters before running the default seeder.');
+        }
+
         $userModel = model(UserModel::class);
         $userModel->insert([
             'username' => 'admin',
             'full_name' => 'System Administrator',
-            'password' => 'admin123',
+            'password' => $adminPassword,
         ]);
 
         $customerModel = model(CustomerModel::class);

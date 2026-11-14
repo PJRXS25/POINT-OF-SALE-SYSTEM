@@ -4,6 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'AuthController::loginForm');
+$routes->get('/health', 'HealthController::index');
 $routes->get('/login', 'AuthController::loginForm');
 $routes->post('/login', 'AuthController::login');
 $routes->post('/logout', 'AuthController::logout');
@@ -11,6 +12,7 @@ $routes->post('/logout', 'AuthController::logout');
 // Customer portal
 $routes->get('/shop', 'ShopController::index');
 $routes->get('/shop/products', 'ShopController::catalog');
+$routes->get('/media/(:segment)', 'MediaController::show/$1');
 $routes->get('/customer/login', 'CustomerAuthController::loginForm');
 $routes->post('/customer/login', 'CustomerAuthController::login');
 $routes->get('/customer/register', 'CustomerAuthController::registerForm');

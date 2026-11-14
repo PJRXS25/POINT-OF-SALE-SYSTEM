@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\LoginThrottle;
 use App\Models\CustomerModel;
 
 class CustomerAuthController extends BaseController
@@ -24,6 +25,12 @@ class CustomerAuthController extends BaseController
 
     public function login()
     {
+        $throttle = new LoginThrottle();
+        $throttleKey = 'customer-login:' . $this->request->getIPAddress();
+        if (!$throttle->allows($throttleKey, 5, 60)) {
+            return redirect()->back()->withInput()->with('error', 'Too many login attempts. Please wait one minute and try again.');
+        }
+
         $rules = [
             'email' => 'required|valid_email|max_length[100]',
             'password' => 'required',
@@ -40,7 +47,9 @@ class CustomerAuthController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Invalid email or password.');
         }
 
-        session()->regenerate();
+        $throttle->clear($throttleKey);
+
+        session()->regenerate(true);
         session()->set([
             'customer_id' => $customer['id'],
             'customer_name' => $customer['full_name'],
@@ -67,6 +76,11 @@ class CustomerAuthController extends BaseController
 
     public function register()
     {
+        $throttle = new LoginThrottle();
+        if (!$throttle->allows('customer-register:' . $this->request->getIPAddress(), 3, 300)) {
+            return redirect()->back()->withInput()->with('error', 'Too many registration attempts. Please wait a few minutes and try again.');
+        }
+
         $rules = [
             'full_name' => 'required|max_length[100]',
             'email' => 'required|valid_email|max_length[100]',
@@ -96,7 +110,7 @@ class CustomerAuthController extends BaseController
         }
 
         $customer = $this->customerModel->find($customerId);
-        session()->regenerate();
+        session()->regenerate(true);
         session()->set([
             'customer_id' => $customer['id'],
             'customer_name' => $customer['full_name'],
@@ -109,7 +123,7 @@ class CustomerAuthController extends BaseController
     public function logout()
     {
         session()->remove(['customer_id', 'customer_name', 'customer_email', 'customer_intended_url']);
-        session()->regenerate();
+        session()->regenerate(true);
 
         return redirect()->to('/shop')->with('success', 'You have been signed out.');
     }
