@@ -10,6 +10,7 @@ $routes->post('/logout', 'AuthController::logout');
 
 // Customer portal
 $routes->get('/shop', 'ShopController::index');
+$routes->get('/shop/products', 'ShopController::catalog');
 $routes->get('/customer/login', 'CustomerAuthController::loginForm');
 $routes->post('/customer/login', 'CustomerAuthController::login');
 $routes->get('/customer/register', 'CustomerAuthController::registerForm');

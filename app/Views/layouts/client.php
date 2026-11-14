@@ -3,6 +3,8 @@ $path = trim(service('uri')->getPath(), '/');
 $customerName = (string) (session()->get('customer_name') ?? '');
 $cssPath = FCPATH . 'assets/css/client.css';
 $cssVersion = is_file($cssPath) ? (string) filemtime($cssPath) : '1';
+$landingCssPath = FCPATH . 'assets/css/landing.css';
+$landingCssVersion = is_file($landingCssPath) ? (string) filemtime($landingCssPath) : '1';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,6 +13,7 @@ $cssVersion = is_file($cssPath) ? (string) filemtime($cssPath) : '1';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'StoreFlow Shop') ?></title>
     <link rel="stylesheet" href="<?= base_url('assets/css/client.css') ?>?v=<?= esc($cssVersion, 'url') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/landing.css') ?>?v=<?= esc($landingCssVersion, 'url') ?>">
 </head>
 <body>
     <header class="shop-header">

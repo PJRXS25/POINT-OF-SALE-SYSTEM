@@ -24,6 +24,7 @@ You are helping me build a complete Point-of-Sale System using CodeIgniter 4, PH
 - [x] Customer order history and order details added.
 - [x] Staff online-order fulfillment module added.
 - [x] Customer profile and password management added.
+- [x] Professional customer landing page and dedicated catalog added.
 - [x] Customer portal verified end to end with stock restoration after test cleanup.
 - [ ] Complete browser-based CRUD, authentication, upload, and sales workflow testing.
 - [ ] Add broader automated feature and database tests.

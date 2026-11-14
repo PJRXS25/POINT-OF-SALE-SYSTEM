@@ -61,6 +61,8 @@ Open `http://localhost:8080`.
 
 Customer storefront: `http://localhost:8080/shop`
 
+Product catalog: `http://localhost:8080/shop/products`
+
 Customers create their own accounts from the storefront. Portal checkout currently uses cash on pickup.
 
 ## Development login

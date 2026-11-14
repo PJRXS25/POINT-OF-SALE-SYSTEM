@@ -24,6 +24,17 @@ class ShopController extends BaseController
 
     public function index()
     {
+        return view('shop/index', [
+            'featuredProducts' => $this->productModel
+                ->where('stock_quantity >', 0)
+                ->orderBy('created_at', 'DESC')
+                ->findAll(4),
+            'productCount' => $this->productModel->where('stock_quantity >', 0)->countAllResults(),
+        ]);
+    }
+
+    public function catalog()
+    {
         $search = trim((string) $this->request->getGet('q'));
         if (mb_strlen($search) > 100) {
             $search = mb_substr($search, 0, 100);
@@ -34,7 +45,7 @@ class ShopController extends BaseController
             $this->productModel->like('name', $search);
         }
 
-        return view('shop/index', [
+        return view('shop/catalog', [
             'products' => $this->productModel->paginate(12, 'catalog'),
             'pager' => $this->productModel->pager,
             'search' => $search,

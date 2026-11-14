@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/client') ?>
 <?= $this->section('content') ?>
 <section class="portal-page container">
-    <div class="portal-heading"><div><span class="eyebrow">Your selection</span><h1>Shopping cart</h1><p>Review quantities before checkout.</p></div><a href="/shop" class="back-link">&larr; Continue shopping</a></div>
+    <div class="portal-heading"><div><span class="eyebrow">Your selection</span><h1>Shopping cart</h1><p>Review quantities before checkout.</p></div><a href="/shop/products" class="back-link">&larr; Continue shopping</a></div>
     <?php if ($items): ?>
         <div class="cart-layout">
             <form method="post" action="/shop/cart/update" class="portal-card cart-items"><?= csrf_field() ?>
@@ -18,6 +18,6 @@
             </form>
             <aside class="portal-card order-summary"><h2>Order summary</h2><div><span>Items</span><strong><?= esc($itemCount) ?></strong></div><div class="summary-total"><span>Total</span><strong>$<?= esc(number_format($total, 2)) ?></strong></div><a href="/shop/checkout" class="shop-button full">Proceed to checkout</a><small>Payment: cash on pickup</small></aside>
         </div>
-    <?php else: ?><div class="portal-empty"><h2>Your cart is empty</h2><p>Explore the catalog and add something you like.</p><a href="/shop" class="shop-button">Browse products</a></div><?php endif; ?>
+    <?php else: ?><div class="portal-empty"><h2>Your cart is empty</h2><p>Explore the catalog and add something you like.</p><a href="/shop/products" class="shop-button">Browse products</a></div><?php endif; ?>
 </section>
 <?= $this->endSection() ?>
