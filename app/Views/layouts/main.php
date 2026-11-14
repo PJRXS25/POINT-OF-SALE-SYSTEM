@@ -10,8 +10,11 @@ $pageTitles = [
     'customers' => 'Customers',
     'users' => 'Staff',
     'sales' => $currentPath === 'sales/new' ? 'Record Sale' : 'Sales History',
+    'orders' => 'Online Orders',
 ];
 $pageTitle = $pageTitles[$activeSection] ?? 'Point of Sale';
+$stylesheetPath = FCPATH . 'assets/css/app.css';
+$stylesheetVersion = is_file($stylesheetPath) ? (string) filemtime($stylesheetPath) : '1';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -169,7 +172,7 @@ $pageTitle = $pageTitles[$activeSection] ?? 'Point of Sale';
             .content { padding: 18px; }
         }
     </style>
-    <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>?v=<?= esc($stylesheetVersion, 'url') ?>">
 </head>
 <body>
     <div class="app-shell">
@@ -183,6 +186,8 @@ $pageTitle = $pageTitles[$activeSection] ?? 'Point of Sale';
                     <a class="nav-link <?= $activeSection === 'users' ? 'active' : '' ?>" href="/users">Staff</a>
                     <a class="nav-link <?= $currentPath === 'sales/new' ? 'active' : '' ?>" href="/sales/new">Record Sale</a>
                     <a class="nav-link <?= $currentPath === 'sales' ? 'active' : '' ?>" href="/sales">Sales History</a>
+                    <a class="nav-link <?= $activeSection === 'orders' ? 'active' : '' ?>" href="/orders">Online Orders</a>
+                    <a class="nav-link" href="/shop" target="_blank" rel="noopener">Customer Shop</a>
                     <form method="post" action="/logout">
                         <?= csrf_field() ?>
                         <button class="nav-link nav-button" type="submit">Logout</button>

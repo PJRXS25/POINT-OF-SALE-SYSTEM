@@ -30,7 +30,7 @@ class CustomersController extends BaseController
         if ($this->request->getMethod() === 'post') {
             $rules = [
                 'full_name' => 'required|max_length[100]',
-                'email' => 'required|valid_email|max_length[100]',
+                'email' => 'required|valid_email|max_length[100]' . ($id !== null ? '|is_unique[customers.email,id,' . $id . ']' : '|is_unique[customers.email]'),
                 'phone' => 'permit_empty|max_length[20]|regex_match[/^[0-9+() .-]{7,20}$/]',
             ];
 
@@ -45,12 +45,18 @@ class CustomersController extends BaseController
             ];
 
             if ($id === null) {
-                $this->customerModel->insert($data);
-                session()->setFlashdata('success', 'Customer added successfully.');
+                $saved = $this->customerModel->insert($data) !== false;
+                $message = 'Customer added successfully.';
             } else {
-                $this->customerModel->update($id, $data);
-                session()->setFlashdata('success', 'Customer updated successfully.');
+                $saved = $this->customerModel->update($id, $data);
+                $message = 'Customer updated successfully.';
             }
+
+            if (!$saved) {
+                return redirect()->back()->withInput()->with('errors', $this->customerModel->errors());
+            }
+
+            session()->setFlashdata('success', $message);
 
             return redirect()->to('/customers');
         }

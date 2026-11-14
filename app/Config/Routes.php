@@ -8,6 +8,25 @@ $routes->get('/login', 'AuthController::loginForm');
 $routes->post('/login', 'AuthController::login');
 $routes->post('/logout', 'AuthController::logout');
 
+// Customer portal
+$routes->get('/shop', 'ShopController::index');
+$routes->get('/customer/login', 'CustomerAuthController::loginForm');
+$routes->post('/customer/login', 'CustomerAuthController::login');
+$routes->get('/customer/register', 'CustomerAuthController::registerForm');
+$routes->post('/customer/register', 'CustomerAuthController::register');
+$routes->post('/customer/logout', 'CustomerAuthController::logout');
+$routes->post('/shop/cart/add', 'ShopController::addToCart');
+$routes->get('/shop/cart', 'ShopController::cartView');
+$routes->post('/shop/cart/update', 'ShopController::updateCart');
+$routes->post('/shop/cart/remove/(:num)', 'ShopController::removeFromCart/$1');
+
+$routes->group('shop', ['filter' => 'customerAuth'], static function ($routes) {
+    $routes->match(['get', 'post'], 'checkout', 'ShopController::checkout');
+    $routes->get('orders', 'ShopController::orders');
+    $routes->get('orders/(:num)', 'ShopController::orderDetails/$1');
+});
+$routes->match(['get', 'post'], '/customer/profile', 'CustomerAuthController::profile', ['filter' => 'customerAuth']);
+
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/dashboard', 'DashboardController::index');
     $routes->get('/products', 'ProductsController::index');
@@ -28,4 +47,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
 
     $routes->get('/sales', 'SalesController::index');
     $routes->match(['get', 'post'], '/sales/new', 'SalesController::save');
+    $routes->get('/orders', 'OrdersController::index');
+    $routes->get('/orders/(:num)', 'OrdersController::show/$1');
+    $routes->post('/orders/(:num)/status', 'OrdersController::updateStatus/$1');
 });

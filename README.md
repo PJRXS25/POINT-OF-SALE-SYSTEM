@@ -11,6 +11,9 @@ A CodeIgniter 4 point-of-sale application for managing products, customers, staf
 - Transactional sales with row locking and automatic stock deduction
 - Walk-in or registered-customer sales
 - Sales history and dashboard summaries
+- Complete customer portal with registration and login
+- Customer product catalog, cart, checkout, and order history
+- Staff-facing online order fulfillment workflow
 - CSRF-protected forms and escaped view output
 
 ## Technology
@@ -55,6 +58,10 @@ php spark serve
 ```
 
 Open `http://localhost:8080`.
+
+Customer storefront: `http://localhost:8080/shop`
+
+Customers create their own accounts from the storefront. Portal checkout currently uses cash on pickup.
 
 ## Development login
 

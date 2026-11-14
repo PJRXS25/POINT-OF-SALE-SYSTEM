@@ -18,6 +18,13 @@ You are helping me build a complete Point-of-Sale System using CodeIgniter 4, PH
 - [x] Field-level validation feedback and structured phone validation added.
 - [x] Upload directories hardened against PHP/script execution under Apache.
 - [x] Login and authenticated sales search verified through local HTTP requests.
+- [x] Customer registration and authentication portal added.
+- [x] Public product catalog and session cart added.
+- [x] Transactional customer checkout with stock locking added.
+- [x] Customer order history and order details added.
+- [x] Staff online-order fulfillment module added.
+- [x] Customer profile and password management added.
+- [x] Customer portal verified end to end with stock restoration after test cleanup.
 - [ ] Complete browser-based CRUD, authentication, upload, and sales workflow testing.
 - [ ] Add broader automated feature and database tests.
 

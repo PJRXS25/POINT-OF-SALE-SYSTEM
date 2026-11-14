@@ -4,6 +4,8 @@ use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\SaleModel;
 use App\Models\UserModel;
+use App\Models\OrderModel;
+use App\Models\OrderItemModel;
 use CodeIgniter\Test\CIUnitTestCase;
 
 /** @internal */
@@ -11,7 +13,7 @@ final class ModelConfigurationTest extends CIUnitTestCase
 {
     public function testApplicationModelsCanBeCreated(): void
     {
-        foreach ([ProductModel::class, CustomerModel::class, UserModel::class, SaleModel::class] as $modelClass) {
+        foreach ([ProductModel::class, CustomerModel::class, UserModel::class, SaleModel::class, OrderModel::class, OrderItemModel::class] as $modelClass) {
             $model = (new ReflectionClass($modelClass))->newInstanceWithoutConstructor();
             $this->assertInstanceOf($modelClass, $model);
         }
