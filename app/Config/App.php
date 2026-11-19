@@ -19,6 +19,7 @@ class App extends BaseConfig
         // An explicitly configured URL always wins, including custom domains.
         $configuredBaseUrl = env('app.baseURL', env('app_baseURL'));
         if (is_string($configuredBaseUrl) && $configuredBaseUrl !== '') {
+            $this->baseURL = rtrim($configuredBaseUrl, '/') . '/';
             return;
         }
 
